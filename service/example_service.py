@@ -10,7 +10,11 @@ import service.common
 import service.service_spec.example_service_pb2_grpc as grpc_bt_grpc
 from service.service_spec.example_service_pb2 import Result
 
-logging.basicConfig(level=10, format="%(asctime)s - [%(levelname)8s] - %(name)s - %(message)s")
+from grpc_health.v1 import health_pb2_grpc as heartb_pb2_grpc
+from grpc_health.v1 import health_pb2 as heartb_pb2
+
+logging.basicConfig(level=10, format="%(asctime)s - [%(levelname)8s] "
+                                     "- %(name)s - %(message)s")
 log = logging.getLogger("example_service")
 
 
@@ -95,6 +99,16 @@ class CalculatorServicer(grpc_bt_grpc.CalculatorServicer):
         return self.result
 
 
+class HealthServicer(heartb_pb2_grpc.HealthServicer):
+
+    def Check(self, request, context):
+        log.debug("Health Check [{}]".format(request.service))
+        response = heartb_pb2.HealthCheckResponse()
+        # SERVING = 1
+        response.status = 1
+        return response
+
+
 # The gRPC serve function.
 #
 # Params:
@@ -106,6 +120,7 @@ class CalculatorServicer(grpc_bt_grpc.CalculatorServicer):
 def serve(max_workers=10, port=7777):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
     grpc_bt_grpc.add_CalculatorServicer_to_server(CalculatorServicer(), server)
+    heartb_pb2_grpc.add_HealthServicer_to_server(HealthServicer(), server)
     server.add_insecure_port("[::]:{}".format(port))
     return server
 
