@@ -13,6 +13,8 @@ RUN apt-get update && \
 
 RUN apt-get install -y python3 python3-pip
 
+RUN pip3 install squid-py
+
 RUN SNETD_VERSION=`curl -s https://api.github.com/repos/singnet/snet-daemon/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")'` && \
     cd /tmp && \
     wget https://github.com/singnet/snet-daemon/releases/download/${SNETD_VERSION}/snet-daemon-${SNETD_VERSION}-linux-amd64.tar.gz && \
@@ -20,7 +22,7 @@ RUN SNETD_VERSION=`curl -s https://api.github.com/repos/singnet/snet-daemon/rele
     mv snet-daemon-${SNETD_VERSION}-linux-amd64/snetd /usr/bin/snetd
 
 RUN cd ${SINGNET_REPOS} && \
-    git clone https://github.com/singnet/example-service.git && \
+    git clone https://github.com/w1kke/example-service.git && \
     cd example-service && \
     pip3 install -r requirements.txt && \
     sh buildproto.sh
